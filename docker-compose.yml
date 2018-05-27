@@ -1,0 +1,56 @@
+version: "2"
+services:
+
+  redis:
+    image: redis:4-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    hostname: redis
+    volumes:
+      - redis-data:/data
+
+  rabbit:
+    image: rabbitmq:3.6-management
+    ports:
+        - "15672:15672"
+
+  airports:
+    build:
+      context: airports
+    depends_on:
+      - rabbit
+    environment:
+        REDIS_HOST: "redis"
+        REDIS_PORT: "6379"
+        RABBIT_PASSWORD: "guest"
+        RABBIT_USER: "guest"
+        RABBIT_HOST: "rabbit"
+        RABBIT_PORT: "5672"
+
+  trips:
+    build:
+      context: trips
+    depends_on:
+      - rabbit
+    environment:
+        REDIS_HOST: "redis"
+        REDIS_PORT: "6379"
+        RABBIT_PASSWORD: "guest"
+        RABBIT_USER: "guest"
+        RABBIT_HOST: "rabbit"
+        RABBIT_PORT: "5672"
+
+  gateway:
+    build:
+      context: gateway
+    depends_on:
+      - rabbit
+    ports:
+        - "8000:8000"
+    environment:
+        RABBIT_PASSWORD: "guest"
+        RABBIT_USER: "guest"
+        RABBIT_HOST: "rabbit"
+        RABBIT_PORT: "5672"
+
+volumes:
+  redis-data:
