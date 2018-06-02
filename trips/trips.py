@@ -4,7 +4,7 @@ from nameko.rpc import rpc
 from nameko_redis import Redis
 
 
-class AirportsService:
+class TripsService:
     name = "trips_service"
 
     redis = Redis('development')
